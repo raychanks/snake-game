@@ -5,10 +5,13 @@
     <link rel='stylesheet' href='./index.css'>
   </head>
   <body>
-    <h1>Snake Game</h1>
+    <div class='header'>
+      <h1>Snake Game</h1>
+      <p>Score: <span class='score'>0</span></p>
+    </div>
     <canvas id='port'></canvas>
     <div id='modal'>
-      <div>
+      <div class='modal__container'>
         <p>Game Over</p>
         <button id='restart'>Play Again</button>
       </div>

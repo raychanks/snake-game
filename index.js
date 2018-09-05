@@ -1,16 +1,28 @@
 const canvas = document.querySelector('#port');
 const modal = document.querySelector('#modal');
 const button = document.querySelector('#restart');
+const scoreSpan = document.querySelector('.score');
 const ctx = canvas.getContext('2d');
 
 const gridWidth = 5;
 const boxSize = 30;
 const stepSize = (boxSize + gridWidth);
-const refreshInterval = 250;
+const refreshInterval = 150;
+const headerHeight = 77;
+const lengthAdditionForFood = 5;
+const scoreFactorArr = [5, 8, 13, 20, 30, 45, 60, 80, 100];
+const lengthArr = [20, 40, 70, 100, 130, 160, 200, 250];
 
 // 77px for the header and its margin
-canvas.height = window.innerHeight - 77 - (window.innerHeight - 77) % stepSize - gridWidth;
-canvas.width = window.innerWidth - window.innerWidth % stepSize - gridWidth;
+canvas.height =
+  window.innerHeight
+  - headerHeight
+  - (window.innerHeight - headerHeight) % stepSize
+  - gridWidth;
+canvas.width =
+  window.innerWidth
+  - window.innerWidth % stepSize
+  - gridWidth;
 
 const maxColumns = Math.floor(canvas.width / stepSize);
 const maxRows = Math.floor(canvas.height / stepSize);
@@ -22,12 +34,18 @@ let headLocation = {
 };
 
 // d - down, u - up, l - left, r - right
-let linksFromHead = ['u', 'r', 'r', 'd', 'r'];
+// index 0: point from the first body block to the head
+// index 1: point from the second body block to the first body block
+// and etc
+let links = ['u'];
 let foodLocation = {
   x: 210,
   y: 140,
 };
 let currentDirection = 'r';
+let addLengthCount = 0;
+let score = 0;
+let scoreLevel = 0;
 let intervalId;
 
 // listeners for keyboard inputs
@@ -47,7 +65,7 @@ window.addEventListener('keydown', event => {
   const newDir = keyObj[event.key];
 
   // ignore direction change if it goes backwards towords to body
-  if (newDir && oppositeDir[newDir] !== linksFromHead[0]) {
+  if (newDir && oppositeDir[newDir] !== links[0]) {
     currentDirection = newDir;
   }
 });
@@ -57,7 +75,7 @@ button.addEventListener('click', function () {
     x: startX,
     y: startY,
   };
-  linksFromHead = ['u', 'r', 'r', 'd', 'r'];
+  links = ['u'];
   foodLocation = {
     x: 210,
     y: 140,
@@ -80,7 +98,7 @@ function drawSnake() {
 
   ctx.fillStyle = 'cadetblue';
 
-  linksFromHead.forEach(direction => {
+  links.forEach(direction => {
     switch (direction) {
     case 'r':
       bodyX -= stepSize;
@@ -106,7 +124,7 @@ function drawSnake() {
   });
 }
 
-function checkCollide(linksFromHead, headLocation, currentDirection) {
+function checkCollision(links, headLocation, currentDirection) {
   // check for collision with bounds
   if (
     headLocation.x === 0 && currentDirection === 'l'
@@ -123,7 +141,7 @@ function checkCollide(linksFromHead, headLocation, currentDirection) {
     down: 0,
   };
 
-  for (let direction of linksFromHead) {
+  for (let direction of links) {
     switch (direction) {
     case 'r':
       directionObj.right++;
@@ -154,12 +172,12 @@ function checkCollide(linksFromHead, headLocation, currentDirection) {
   return false;
 }
 
-function snakeFood(headLocation, foodLocation, linksFromHead) {
+function snakeFood(headLocation, foodLocation, links) {
   const occupied = [headLocation];
   let refX;
   let refY;
 
-  linksFromHead.forEach(direction => {
+  links.forEach(direction => {
     refX = occupied[occupied.length - 1].x;
     refY = occupied[occupied.length - 1].y;
 
@@ -200,6 +218,7 @@ function snakeFood(headLocation, foodLocation, linksFromHead) {
       newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
     }
 
+    addLengthCount += lengthAdditionForFood;
     foodLocation.x = newX;
     foodLocation.y = newY;
   }
@@ -209,10 +228,23 @@ function snakeFood(headLocation, foodLocation, linksFromHead) {
 }
 
 function updateCanvas() {
-  linksFromHead.pop();
-  linksFromHead.unshift(currentDirection);
+  if (addLengthCount !== 0) {
+    links.unshift(currentDirection);
 
-  if (checkCollide(linksFromHead, headLocation, currentDirection)) {
+    // increase score increment if certain length is met
+    if (lengthArr.includes(links.length)) {
+      scoreLevel++;
+    }
+
+    score += scoreFactorArr[scoreLevel];
+    scoreSpan.textContent = score;
+    addLengthCount--;
+  } else {
+    links.pop();
+    links.unshift(currentDirection);
+  }
+
+  if (checkCollision(links, headLocation, currentDirection)) {
     window.clearInterval(intervalId);
     modal.style.display = 'flex';
   } else {
@@ -239,7 +271,7 @@ function updateCanvas() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawSnake();
-    snakeFood(headLocation, foodLocation, linksFromHead);
+    snakeFood(headLocation, foodLocation, links);
   }
 }
 

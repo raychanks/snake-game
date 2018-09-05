@@ -1,17 +1,44 @@
+
 body {
   margin: 0;
 }
 
 h1 {
-  margin: 20px 0;
+  margin: 0 0 0 50px;
 }
 
 canvas {
   display: block;
   background: lightgreen;
   margin: 0 auto;
-/*  border: 1px solid grey;
-  box-sizing: border-box;*/
+}
+
+.header {
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header p {
+  font-size: 1.5em;
+  margin: 0 100px 0 0;
+}
+
+.modal__container p {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+.modal__container button {
+  width: 100px;
+  height: 40px;
+  background: lightseagreen;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 1px 1px 2px seagreen;
+  outline: none;
 }
 
 #modal {
@@ -35,20 +62,4 @@ canvas {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-}
-
-div > p {
-  font-size: 1.5em;
-  margin-top: 0;
-}
-
-div > button {
-  width: 100px;
-  height: 40px;
-  background: lightseagreen;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 1px 1px 2px seagreen;
-  outline: none;
 }
