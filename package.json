@@ -1,0 +1,7 @@
+{
+  "name": "SnakeGame",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Ray Chan",
+  "license": "MIT"
+}
