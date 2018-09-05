@@ -6,10 +6,11 @@ const ctx = canvas.getContext('2d');
 const gridWidth = 5;
 const boxSize = 30;
 const stepSize = (boxSize + gridWidth);
+const refreshInterval = 250;
 
 // 77px for the header and its margin
-canvas.height = window.innerHeight - 77 - window.innerHeight % stepSize;
-canvas.width = window.innerWidth - window.innerWidth % stepSize;
+canvas.height = window.innerHeight - 77 - (window.innerHeight - 77) % stepSize - gridWidth;
+canvas.width = window.innerWidth - window.innerWidth % stepSize - gridWidth;
 
 const maxColumns = Math.floor(canvas.width / stepSize);
 const maxRows = Math.floor(canvas.height / stepSize);
@@ -53,16 +54,16 @@ window.addEventListener('keydown', event => {
 
 button.addEventListener('click', function () {
   headLocation = {
-    x: 200,
-    y: 200,
+    x: startX,
+    y: startY,
   };
   linksFromHead = ['u', 'r', 'r', 'd', 'r'];
   foodLocation = {
-    x: 480,
-    y: 480,
+    x: 210,
+    y: 140,
   };
   currentDirection = 'r';
-  intervalId = window.setInterval(updateCanvas, 500);
+  intervalId = window.setInterval(updateCanvas, refreshInterval);
   modal.style.display = 'none';
   updateCanvas();
 });
@@ -105,7 +106,18 @@ function drawSnake() {
   });
 }
 
-function checkCollide(linksFromHead) {
+function checkCollide(linksFromHead, headLocation, currentDirection) {
+  // check for collision with bounds
+  if (
+    headLocation.x === 0 && currentDirection === 'l'
+  || headLocation.x + stepSize > canvas.width && currentDirection === 'r'
+  || headLocation.y === 0 && currentDirection === 'u'
+  || headLocation.y + stepSize > canvas.height && currentDirection === 'd'
+  ) {
+    return true;
+  }
+
+  // check for self-collision
   const directionObj = {
     right: 0,
     down: 0,
@@ -200,7 +212,7 @@ function updateCanvas() {
   linksFromHead.pop();
   linksFromHead.unshift(currentDirection);
 
-  if (checkCollide(linksFromHead)) {
+  if (checkCollide(linksFromHead, headLocation, currentDirection)) {
     window.clearInterval(intervalId);
     modal.style.display = 'flex';
   } else {
@@ -233,4 +245,4 @@ function updateCanvas() {
 
 updateCanvas();
 
-intervalId = window.setInterval(updateCanvas, 350);
+intervalId = window.setInterval(updateCanvas, refreshInterval);
