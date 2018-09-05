@@ -26,28 +26,23 @@ canvas.width =
 
 const maxColumns = Math.floor(canvas.width / stepSize);
 const maxRows = Math.floor(canvas.height / stepSize);
-const startX = 70;
-const startY = 70;
-let foodX = Math.floor(Math.random() * maxColumns) * stepSize;
-let foodY = Math.floor(Math.random() * maxRows) * stepSize;
-let headLocation = {
-  x: startX,
-  y: startY,
-};
+const startX = 2 * stepSize;
+const startY = 2 * stepSize;
+let foodX;
+let foodY;
+let headLocation;
 
+// links = ['u'];
 // d - down, u - up, l - left, r - right
 // index 0: point from the first body block to the head
 // index 1: point from the second body block to the first body block
 // and etc
-let links = ['u'];
-let foodLocation = {
-  x: foodX,
-  y: foodY,
-};
-let currentDirection = 'r';
-let addLengthCount = 0;
-let score = 0;
-let scoreLevel = 0;
+let links;
+let foodLocation;;
+let currentDirection;
+let addLengthCount;
+let score;
+let scoreLevel;
 let intervalId;
 
 // listeners for keyboard inputs
@@ -66,13 +61,15 @@ window.addEventListener('keydown', event => {
   };
   const newDir = keyObj[event.key];
 
-  // ignore direction change if it goes backwards towords to body
+  // ignore direction change if it goes backwards to body
   if (newDir && oppositeDir[newDir] !== links[0]) {
     currentDirection = newDir;
   }
 });
 
-button.addEventListener('click', function () {
+button.addEventListener('click', init);
+
+function init() {
   foodX = Math.floor(Math.random() * maxColumns) * stepSize;
   foodY = Math.floor(Math.random() * maxRows) * stepSize;
 
@@ -86,10 +83,14 @@ button.addEventListener('click', function () {
     y: foodY,
   };
   currentDirection = 'r';
+  addLengthCount = 0;
+  score = 0;
+  scoreLevel = 0;
+
   intervalId = window.setInterval(updateCanvas, refreshInterval);
   modal.style.display = 'none';
   updateCanvas();
-});
+}
 
 function drawSnake() {
   ctx.beginPath();
@@ -100,28 +101,23 @@ function drawSnake() {
 
   // snake body
   let { x: bodyX, y: bodyY } = headLocation;
+  const methods = {
+    r() {
+      bodyX -= stepSize;
+    },
+    l() {
+      bodyX += stepSize;
+    },
+    d() {
+      bodyY -= stepSize;
+    },
+    u() {
+      bodyY += stepSize;
+    },
+  };
 
   links.forEach((direction, idx) => {
-    switch (direction) {
-    case 'r':
-      bodyX -= stepSize;
-      break;
-
-    case 'l':
-      bodyX += stepSize;
-      break;
-
-    case 'd':
-      bodyY -= stepSize;
-      break;
-
-    case 'u':
-      bodyY += stepSize;
-      break;
-
-    default:
-      throw new Error('Invalid data type');
-    }
+    methods[direction]();
 
     ctx.fillStyle = `rgba(${95 - idx / 8}, ${158 - idx / 4}, ${160 - idx / 2})`;
     ctx.fillRect(bodyX, bodyY, boxSize, boxSize);
@@ -144,28 +140,23 @@ function checkCollision(links, headLocation, currentDirection) {
     right: 0,
     down: 0,
   };
+  const methods = {
+    r() {
+      directionObj.right++;
+    },
+    l() {
+      directionObj.right--;
+    },
+    d() {
+      directionObj.down++;
+    },
+    u() {
+      directionObj.down--;
+    },
+  };
 
   for (let direction of links) {
-    switch (direction) {
-    case 'r':
-      directionObj.right++;
-      break;
-
-    case 'l':
-      directionObj.right--;
-      break;
-
-    case 'd':
-      directionObj.down++;
-      break;
-
-    case 'u':
-      directionObj.down--;
-      break;
-
-    default:
-      throw new Error('Invalid data type');
-    }
+    methods[direction]();
 
     // forms a loop, which implies the snake collide with itself
     if (directionObj.right === 0 && directionObj.down === 0) {
@@ -180,37 +171,27 @@ function snakeFood(headLocation, foodLocation, links) {
   const occupied = [headLocation];
   let refX;
   let refY;
+  const methods = {
+    r() {
+      refX -= stepSize;
+    },
+    l() {
+      refX += stepSize;
+    },
+    d() {
+      refY -= stepSize;
+    },
+    u() {
+      refY += stepSize;
+    },
+  };
 
   links.forEach(direction => {
     refX = occupied[occupied.length - 1].x;
     refY = occupied[occupied.length - 1].y;
-
-    switch (direction) {
-    case 'r':
-      refX -= stepSize;
-      break;
-
-    case 'l':
-      refX += stepSize;
-      break;
-
-    case 'd':
-      refY -= stepSize;
-      break;
-
-    case 'u':
-      refY += stepSize;
-      break;
-
-    default:
-      throw new Error('Invalid data type');
-    }
-
+    methods[direction]();
     occupied.push({ x: refX, y: refY });
   });
-
-  const newX = startX % stepSize + Math.floor(Math.random() * maxColumns) * stepSize;
-  const newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
 
   if (headLocation.x === foodLocation.x
     && headLocation.y === foodLocation.y) {
@@ -218,8 +199,14 @@ function snakeFood(headLocation, foodLocation, links) {
     let newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
 
     while (occupied.some(loc => loc.x === newX && loc.y === newY)) {
-      newX = startX % stepSize + Math.floor(Math.random() * maxColumns) * stepSize;
-      newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
+      newX =
+        startX % stepSize
+        + Math.floor(Math.random() * maxColumns)
+        * stepSize;
+      newY =
+        startX % stepSize
+        + Math.floor(Math.random() * maxRows)
+        * stepSize;
     }
 
     addLengthCount += lengthAdditionForFood;
@@ -252,33 +239,26 @@ function updateCanvas() {
     window.clearInterval(intervalId);
     modal.style.display = 'flex';
   } else {
-    switch (currentDirection) {
-    case 'r':
-      headLocation.x += stepSize;
-      break;
+    const methods = {
+      r() {
+        headLocation.x += stepSize;
+      },
+      l() {
+        headLocation.x -= stepSize;
+      },
+      d() {
+        headLocation.y += stepSize;
+      },
+      u() {
+        headLocation.y -= stepSize;
+      },
+    };
 
-    case 'l':
-      headLocation.x -= stepSize;
-      break;
-
-    case 'd':
-      headLocation.y += stepSize;
-      break;
-
-    case 'u':
-      headLocation.y -= stepSize;
-      break;
-
-    default:
-      throw new Error('Invalid data type');
-    }
-
+    methods[currentDirection]();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawSnake();
     snakeFood(headLocation, foodLocation, links);
   }
 }
 
-updateCanvas();
-
-intervalId = window.setInterval(updateCanvas, refreshInterval);
+init();
