@@ -10,3 +10,42 @@ canvas {
   display: block;
   background: lightgreen;
 }
+
+#modal {
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal > div {
+  width: 300px;
+  height: 140px;
+  background: #eee;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+div > p {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+div > button {
+  width: 100px;
+  height: 40px;
+  background: lightseagreen;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 1px 1px 2px seagreen;
+  outline: none;
+}
