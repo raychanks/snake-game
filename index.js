@@ -28,6 +28,8 @@ const maxColumns = Math.floor(canvas.width / stepSize);
 const maxRows = Math.floor(canvas.height / stepSize);
 const startX = 70;
 const startY = 70;
+let foodX = Math.floor(Math.random() * maxColumns) * stepSize;
+let foodY = Math.floor(Math.random() * maxRows) * stepSize;
 let headLocation = {
   x: startX,
   y: startY,
@@ -39,8 +41,8 @@ let headLocation = {
 // and etc
 let links = ['u'];
 let foodLocation = {
-  x: 210,
-  y: 140,
+  x: foodX,
+  y: foodY,
 };
 let currentDirection = 'r';
 let addLengthCount = 0;
@@ -71,14 +73,17 @@ window.addEventListener('keydown', event => {
 });
 
 button.addEventListener('click', function () {
+  foodX = Math.floor(Math.random() * maxColumns) * stepSize;
+  foodY = Math.floor(Math.random() * maxRows) * stepSize;
+
   headLocation = {
     x: startX,
     y: startY,
   };
   links = ['u'];
   foodLocation = {
-    x: 210,
-    y: 140,
+    x: foodX,
+    y: foodY,
   };
   currentDirection = 'r';
   intervalId = window.setInterval(updateCanvas, refreshInterval);
