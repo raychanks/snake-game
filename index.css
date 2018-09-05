@@ -9,6 +9,8 @@ h1 {
 canvas {
   display: block;
   background: lightgreen;
+  margin: 0 auto;
+  border: 1px solid grey;
 }
 
 #modal {

@@ -3,23 +3,28 @@ const modal = document.querySelector('#modal');
 const button = document.querySelector('#restart');
 const ctx = canvas.getContext('2d');
 
-// 77px for the header and its margin
-canvas.height = window.innerHeight - 77;
-canvas.width = window.innerWidth;
-
 const gridWidth = 5;
 const boxSize = 30;
 const stepSize = (boxSize + gridWidth);
+
+// 77px for the header and its margin
+canvas.height = window.innerHeight - 77 - window.innerHeight % stepSize;
+canvas.width = window.innerWidth - window.innerWidth % stepSize;
+
+const maxColumns = Math.floor(canvas.width / stepSize);
+const maxRows = Math.floor(canvas.height / stepSize);
+const startX = 70;
+const startY = 70;
 let headLocation = {
-  x: 200,
-  y: 200,
+  x: startX,
+  y: startY,
 };
 
 // d - down, u - up, l - left, r - right
 let linksFromHead = ['u', 'r', 'r', 'd', 'r'];
 let foodLocation = {
-  x: 480,
-  y: 480,
+  x: 210,
+  y: 140,
 };
 let currentDirection = 'r';
 let intervalId;
@@ -137,6 +142,60 @@ function checkCollide(linksFromHead) {
   return false;
 }
 
+function snakeFood(headLocation, foodLocation, linksFromHead) {
+  const occupied = [headLocation];
+  let refX;
+  let refY;
+
+  linksFromHead.forEach(direction => {
+    refX = occupied[occupied.length - 1].x;
+    refY = occupied[occupied.length - 1].y;
+
+    switch (direction) {
+    case 'r':
+      refX -= stepSize;
+      break;
+
+    case 'l':
+      refX += stepSize;
+      break;
+
+    case 'd':
+      refY -= stepSize;
+      break;
+
+    case 'u':
+      refY += stepSize;
+      break;
+
+    default:
+      throw new Error('Invalid data type');
+    }
+
+    occupied.push({ x: refX, y: refY });
+  });
+
+  const newX = startX % stepSize + Math.floor(Math.random() * maxColumns) * stepSize;
+  const newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
+
+  if (headLocation.x === foodLocation.x
+    && headLocation.y === foodLocation.y) {
+    let newX = startX % stepSize + Math.floor(Math.random() * maxColumns) * stepSize;
+    let newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
+
+    while (occupied.some(loc => loc.x === newX && loc.y === newY)) {
+      newX = startX % stepSize + Math.floor(Math.random() * maxColumns) * stepSize;
+      newY = startX % stepSize + Math.floor(Math.random() * maxRows) * stepSize;
+    }
+
+    foodLocation.x = newX;
+    foodLocation.y = newY;
+  }
+
+  ctx.fillStyle = 'crimson';
+  ctx.fillRect(foodLocation.x, foodLocation.y, boxSize, boxSize);
+}
+
 function updateCanvas() {
   linksFromHead.pop();
   linksFromHead.unshift(currentDirection);
@@ -168,15 +227,10 @@ function updateCanvas() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawSnake();
-
-    // food
-    ctx.fillStyle = 'crimson';
-    ctx.fillRect(foodLocation.x, foodLocation.y, boxSize, boxSize);
+    snakeFood(headLocation, foodLocation, linksFromHead);
   }
 }
 
 updateCanvas();
 
 intervalId = window.setInterval(updateCanvas, 350);
-
-
