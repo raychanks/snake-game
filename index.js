@@ -96,9 +96,7 @@ function drawSnake() {
   // snake body
   let { x: bodyX, y: bodyY } = headLocation;
 
-  ctx.fillStyle = 'cadetblue';
-
-  links.forEach(direction => {
+  links.forEach((direction, idx) => {
     switch (direction) {
     case 'r':
       bodyX -= stepSize;
@@ -120,6 +118,7 @@ function drawSnake() {
       throw new Error('Invalid data type');
     }
 
+    ctx.fillStyle = `rgba(${95 - idx / 8}, ${158 - idx / 4}, ${160 - idx / 2})`;
     ctx.fillRect(bodyX, bodyY, boxSize, boxSize);
   });
 }
